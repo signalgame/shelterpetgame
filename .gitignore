@@ -1,0 +1,291 @@
+# =============================================================================
+# PET SHELTER RUSH - GITIGNORE
+# =============================================================================
+# This file ensures no sensitive data, personal information, or unnecessary
+# files are committed to the repository.
+# =============================================================================
+
+# =============================================================================
+# KEYSTORE & SIGNING (CRITICAL - NEVER COMMIT)
+# =============================================================================
+
+# Keystore files (Android signing keys)
+*.jks
+*.keystore
+**/*.jks
+**/*.keystore
+
+# Key properties (contains passwords)
+**/key.properties
+key.properties
+
+# Base64 encoded keystore files
+*-base64.txt
+*-keystore-base64.txt
+petshelter-keystore-base64.txt
+
+# Upload keystore
+upload-keystore.jks
+release-keystore.jks
+
+# =============================================================================
+# CREDENTIALS & SECRETS
+# =============================================================================
+
+# Environment files
+.env
+.env.*
+*.env
+.env.local
+.env.*.local
+
+# Credential files
+**/credentials.json
+**/google-services.json
+**/GoogleService-Info.plist
+**/firebase_options.dart
+**/secrets.dart
+**/secrets.json
+**/api_keys.dart
+
+# Security keys
+*.pem
+*.p12
+*.key
+*.cer
+*.der
+*.pfx
+
+# =============================================================================
+# FLUTTER/DART
+# =============================================================================
+
+# Flutter generated files
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+build/
+/build/
+**/build/
+
+# Coverage and documentation
+/coverage/
+**/doc/api/
+documentation/
+
+# Symbolication and obfuscation
+app.*.symbols
+app.*.map.json
+
+# Generated code
+*.g.dart
+*.freezed.dart
+*.mocks.dart
+
+# Packages
+.packages
+
+# Metadata (contains Flutter version info)
+.metadata
+
+# =============================================================================
+# ANDROID - SENSITIVE & GENERATED
+# =============================================================================
+
+# Local properties (CRITICAL - contains system paths and usernames)
+**/local.properties
+
+# Gradle files
+**/.gradle/
+**/gradle-wrapper.jar
+**/gradlew
+**/gradlew.bat
+**/captures/
+**/.cxx/
+
+# Generated plugin registry
+**/GeneratedPluginRegistrant.java
+**/GeneratedPluginRegistrant.kt
+
+# Android build artifacts
+/android/app/debug/
+/android/app/profile/
+/android/app/release/
+**/app/build/
+**/android/build/
+
+# =============================================================================
+# iOS - SENSITIVE & GENERATED
+# =============================================================================
+
+**/ios/Flutter/.last_build_id
+**/ios/.generated/
+**/ios/Flutter/App.framework
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/ephemeral/
+**/ios/Flutter/app.flx
+**/ios/Flutter/app.zip
+**/ios/Flutter/flutter_assets/
+**/ios/Flutter/flutter_export_environment.sh
+
+# CocoaPods
+**/Pods/
+**/.symlinks/
+**/Podfile.lock
+
+# Xcode user data (contains personal preferences)
+**/xcuserdata/
+**/*.xcuserstate
+*.mode1v3
+*.mode2v3
+*.moved-aside
+*.pbxuser
+*.perspectivev3
+**/*sync/
+**/DerivedData/
+**/dgph
+.sconsign.dblite
+.tags*
+**/.vagrant/
+profile
+
+# Generated
+**/Runner/GeneratedPluginRegistrant.*
+**/ServiceDefinitions.json
+
+# =============================================================================
+# IDE & EDITOR
+# =============================================================================
+
+# IntelliJ IDEA / Android Studio
+.idea/
+*.iml
+*.ipr
+*.iws
+.idea_modules/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# JetBrains Rider
+*.sln.iml
+
+# Sublime Text
+*.sublime-workspace
+*.sublime-project
+
+# Atom
+.atom/
+
+# =============================================================================
+# OPERATING SYSTEM FILES
+# =============================================================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# =============================================================================
+# LOGS & TEMPORARY FILES
+# =============================================================================
+
+*.log
+*.tmp
+*.temp
+*.cache
+*.swp
+*.swo
+*.swn
+.history
+.buildlog/
+migrate_working_dir/
+
+# =============================================================================
+# BUILD & DISTRIBUTION
+# =============================================================================
+
+# APK and AAB files (GitHub Actions generates these)
+*.apk
+*.aab
+*.ipa
+
+# Bundle files
+*.bundle
+
+# =============================================================================
+# TESTING & COVERAGE
+# =============================================================================
+
+coverage/
+.test_coverage/
+lcov.info
+
+# =============================================================================
+# MISCELLANEOUS
+# =============================================================================
+
+*.class
+*.pyc
+.svn/
+.swiftpm/
+.build/
+
+# Node (if using any JS tooling)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# =============================================================================
+# EXCEPTIONS - FILES TO KEEP
+# =============================================================================
+
+!.gitkeep
+!default.mode1v3
+!default.mode2v3
+!default.pbxuser
+!default.perspectivev3
+
+# Keep gradle wrapper properties (version info only, no personal data)
+!**/gradle-wrapper.properties
+
+# Keep proguard rules
+!**/proguard-rules.pro

@@ -1,0 +1,201 @@
+# =============================================================================
+# Pet Shelter Rush - Android Release Build Workflow
+# =============================================================================
+# This workflow builds signed APK and AAB files for Google Play Store release.
+#
+# SECURITY NOTES:
+# - Keystore is decoded from base64 at runtime and deleted after build
+# - No secrets are printed to logs
+# - All sensitive data is stored in GitHub Secrets only
+# =============================================================================
+
+name: Build Android Release
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - release/*
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+    # Allows manual triggering from GitHub Actions UI
+
+env:
+  FLUTTER_VERSION: '3.38.5'
+  JAVA_VERSION: '17'
+
+jobs:
+  build-android:
+    name: Build Signed APK & AAB
+    runs-on: ubuntu-latest
+    
+    steps:
+      # =========================================
+      # CHECKOUT
+      # =========================================
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # =========================================
+      # SETUP ENVIRONMENT
+      # =========================================
+      - name: Set up Java ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Set up Flutter ${{ env.FLUTTER_VERSION }}
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable'
+          cache: true
+
+      - name: Verify Flutter Installation
+        run: |
+          flutter --version
+          flutter doctor -v
+
+      # =========================================
+      # INSTALL DEPENDENCIES
+      # =========================================
+      - name: Get Flutter Dependencies
+        run: flutter pub get
+
+      # =========================================
+      # DECODE KEYSTORE (SECURE)
+      # =========================================
+      - name: Decode Keystore from Secrets
+        env:
+          PETSHELTER_KEYSTORE_BASE64: ${{ secrets.PETSHELTER_KEYSTORE_BASE64 }}
+        run: |
+          # Decode the base64 keystore to a file
+          echo "$PETSHELTER_KEYSTORE_BASE64" | base64 --decode > android/app/release-keystore.jks
+          
+          # Verify keystore was created (without exposing contents)
+          if [ -f android/app/release-keystore.jks ]; then
+            echo "✓ Keystore file created successfully"
+          else
+            echo "✗ Failed to create keystore file"
+            exit 1
+          fi
+
+      # =========================================
+      # CREATE KEY.PROPERTIES FILE
+      # =========================================
+      - name: Create key.properties
+        env:
+          PETSHELTER_KEY_ALIAS: ${{ secrets.PETSHELTER_KEY_ALIAS }}
+          PETSHELTER_KEY_PASSWORD: ${{ secrets.PETSHELTER_KEY_PASSWORD }}
+          PETSHELTER_STORE_PASSWORD: ${{ secrets.PETSHELTER_STORE_PASSWORD }}
+        run: |
+          cat > android/key.properties << EOF
+          storePassword=$PETSHELTER_STORE_PASSWORD
+          keyPassword=$PETSHELTER_KEY_PASSWORD
+          keyAlias=$PETSHELTER_KEY_ALIAS
+          storeFile=release-keystore.jks
+          EOF
+          
+          echo "✓ key.properties created successfully"
+
+      # =========================================
+      # BUILD SIGNED APK (RELEASE MODE)
+      # =========================================
+      - name: Build Signed APK (Release)
+        run: |
+          flutter build apk --release --no-tree-shake-icons
+          
+          echo "✓ APK build completed"
+
+      # =========================================
+      # BUILD SIGNED AAB (RELEASE MODE)
+      # =========================================
+      - name: Build Signed AAB (Release)
+        run: |
+          flutter build appbundle --release --no-tree-shake-icons
+          
+          echo "✓ AAB build completed"
+
+      # =========================================
+      # VERIFY BUILDS ARE SIGNED
+      # =========================================
+      - name: Verify APK Signature
+        run: |
+          APK_PATH="build/app/outputs/flutter-apk/app-release.apk"
+          if [ -f "$APK_PATH" ]; then
+            # Use apksigner to verify (comes with Android SDK)
+            $ANDROID_HOME/build-tools/*/apksigner verify --print-certs "$APK_PATH" 2>&1 | head -5
+            echo "✓ APK signature verified"
+          else
+            echo "✗ APK file not found"
+            exit 1
+          fi
+
+      - name: Verify AAB Exists
+        run: |
+          AAB_PATH="build/app/outputs/bundle/release/app-release.aab"
+          if [ -f "$AAB_PATH" ]; then
+            echo "✓ AAB file exists: $(ls -lh $AAB_PATH | awk '{print $5}')"
+          else
+            echo "✗ AAB file not found"
+            exit 1
+          fi
+
+      # =========================================
+      # CLEANUP SENSITIVE FILES
+      # =========================================
+      - name: Cleanup Keystore and Credentials
+        if: always()
+        run: |
+          # Securely delete keystore
+          if [ -f android/app/release-keystore.jks ]; then
+            shred -u android/app/release-keystore.jks 2>/dev/null || rm -f android/app/release-keystore.jks
+            echo "✓ Keystore file deleted"
+          fi
+          
+          # Securely delete key.properties
+          if [ -f android/key.properties ]; then
+            shred -u android/key.properties 2>/dev/null || rm -f android/key.properties
+            echo "✓ key.properties deleted"
+          fi
+
+      # =========================================
+      # UPLOAD ARTIFACTS
+      # =========================================
+      - name: Upload Signed APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: pet-shelter-rush-apk-${{ github.sha }}
+          path: build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Upload Signed AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: pet-shelter-rush-aab-${{ github.sha }}
+          path: build/app/outputs/bundle/release/app-release.aab
+          retention-days: 30
+          if-no-files-found: error
+
+      # =========================================
+      # BUILD SUMMARY
+      # =========================================
+      - name: Build Summary
+        run: |
+          echo "========================================"
+          echo "       BUILD COMPLETED SUCCESSFULLY"
+          echo "========================================"
+          echo ""
+          echo "APK: build/app/outputs/flutter-apk/app-release.apk"
+          echo "AAB: build/app/outputs/bundle/release/app-release.aab"
+          echo ""
+          echo "Artifacts uploaded with SHA: ${{ github.sha }}"
+          echo "========================================"

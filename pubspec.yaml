@@ -1,0 +1,55 @@
+name: pet_shelter_rush
+description: "Pet Shelter Rush - A Flame game"
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.4
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # Game engine
+  flame: ^1.34.0
+  flame_audio: ^2.11.12
+  
+  # Fonts
+  google_fonts: ^6.2.1
+
+  # Storage
+  shared_preferences: ^2.5.4
+  hive_ce: ^2.16.0
+  
+  # UI
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.4
+
+flutter_launcher_icons:
+  android: "ic_launcher"
+  ios: true
+  image_path: "assets/images/ui/logo.png"
+  min_sdk_android: 21
+  web:
+    generate: true
+    image_path: "assets/images/ui/logo.png"
+    background_color: "#FFF9E6"
+    theme_color: "#FFF9E6"
+
+flutter:
+  uses-material-design: true
+
+  # Assets folders for game resources
+  assets:
+    - assets/images/
+    - assets/images/backgrounds/
+    - assets/images/characters/
+    - assets/images/effects/
+    - assets/images/ui/
+    - assets/audio/
