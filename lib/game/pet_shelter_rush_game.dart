@@ -201,7 +201,7 @@ class PetShelterRushGame extends FlameGame
     
     // Start Music
     if (StorageService.instance.getSoundEnabled()) {
-      FlameAudio.bgm.play('music_gameplay.mp3', volume: 0.5);
+      FlameAudio.bgm.play('music_gameplay.mp3', volume: 0.15);
     }
   }
 
@@ -310,7 +310,7 @@ class PetShelterRushGame extends FlameGame
     
     // Play timeout sound (reuse wrong sound)
     if (StorageService.instance.getSoundEnabled()) {
-      FlameAudio.play('sfx_wrong.mp3');
+      FlameAudio.play('sfx_wrong.mp3', volume: 0.3);
     }
     
     // Spawn dust cloud at animal position
@@ -438,11 +438,11 @@ class PetShelterRushGame extends FlameGame
     // Play Sound
     if (StorageService.instance.getSoundEnabled()) {
       if (type == AnimalType.dog) {
-        FlameAudio.play('sfx_bark.mp3');
+        FlameAudio.play('sfx_bark.mp3', volume: 0.3);
       } else if (type == AnimalType.cat) {
-         FlameAudio.play('sfx_meow.mp3');
+         FlameAudio.play('sfx_meow.mp3', volume: 0.3);
       } else {
-         FlameAudio.play('sfx_wild_exit.mp3');
+         FlameAudio.play('sfx_wild_exit.mp3', volume: 0.3);
       }
     }
   }
@@ -451,7 +451,7 @@ class PetShelterRushGame extends FlameGame
     lives--;
     livesNotifier.value = lives;
     if (StorageService.instance.getSoundEnabled()) {
-      FlameAudio.play('sfx_wrong.mp3');
+      FlameAudio.play('sfx_wrong.mp3', volume: 0.3);
     }
     
     if (lives <= 0) {
@@ -480,7 +480,7 @@ class PetShelterRushGame extends FlameGame
     isLevelActive = false;
     FlameAudio.bgm.stop();
     if (StorageService.instance.getSoundEnabled()) {
-      FlameAudio.play('sfx_game_over.mp3');
+      FlameAudio.play('sfx_game_over.mp3', volume: 0.3);
     }
 
     // Save Stats
@@ -499,7 +499,7 @@ class PetShelterRushGame extends FlameGame
     isLevelActive = false;
     FlameAudio.bgm.stop();
     if (StorageService.instance.getSoundEnabled()) {
-      FlameAudio.play('sfx_level_complete.mp3');
+      FlameAudio.play('sfx_level_complete.mp3', volume: 0.3);
     }
 
     // Save Stats

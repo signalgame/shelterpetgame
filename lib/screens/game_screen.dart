@@ -68,7 +68,7 @@ class _GameScreenState extends State<GameScreen> {
                 IconButton(
                   icon: const Icon(Icons.pause, size: 36, color: AppTheme.darkText),
                   onPressed: () {
-                     if (isSoundOn) FlameAudio.play('sfx_button.mp3');
+                     if (isSoundOn) FlameAudio.play('sfx_button.mp3', volume: 0.3);
                      game.pauseGame();
                   },
                 ),
@@ -149,25 +149,49 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 
-  Widget _buildOverlayContainer({required Widget child}) {
-    return Center(
-      child: Container(
-        width: 320,
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: AppTheme.creamWhite,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: AppTheme.darkText, width: 4),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.2),
-              blurRadius: 10,
-              offset: const Offset(4, 4),
+  Widget _buildOverlayContainer({required Widget child, bool scrollable = false}) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final screenHeight = constraints.maxHeight;
+        final screenWidth = constraints.maxWidth;
+        final isLandscape = screenWidth > screenHeight;
+        
+        // Responsive sizing for landscape
+        final containerWidth = isLandscape 
+            ? (screenWidth * 0.35).clamp(280.0, 360.0)
+            : (screenWidth * 0.85).clamp(280.0, 320.0);
+        final containerPadding = isLandscape ? 16.0 : 24.0;
+        final maxHeight = isLandscape ? screenHeight * 0.85 : screenHeight * 0.7;
+        
+        Widget content = child;
+        
+        if (scrollable) {
+          content = SingleChildScrollView(
+            child: child,
+          );
+        }
+        
+        return Center(
+          child: Container(
+            width: containerWidth,
+            constraints: BoxConstraints(maxHeight: maxHeight),
+            padding: EdgeInsets.all(containerPadding),
+            decoration: BoxDecoration(
+              color: AppTheme.creamWhite,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: AppTheme.darkText, width: 4),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.2),
+                  blurRadius: 10,
+                  offset: const Offset(4, 4),
+                ),
+              ],
             ),
-          ],
-        ),
-        child: child,
-      ),
+            child: content,
+          ),
+        );
+      },
     );
   }
 
@@ -175,32 +199,33 @@ class _GameScreenState extends State<GameScreen> {
     return ColoredBox(
       color: Colors.black.withValues(alpha: 0.5),
       child: _buildOverlayContainer(
+        scrollable: true,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('PAUSED', style: AppTheme.headerStyle),
-            const SizedBox(height: 24),
+            Text('PAUSED', style: AppTheme.headerStyle.copyWith(fontSize: 28)),
+            const SizedBox(height: 16),
             _buildOverlayButton(
               context,
               label: 'RESUME',
               onPressed: () {
-                if (isSoundOn) FlameAudio.play('sfx_button.mp3');
+                if (isSoundOn) FlameAudio.play('sfx_button.mp3', volume: 0.3);
                 game.resumeEngine();
                 if (isSoundOn) FlameAudio.bgm.resume(); 
                 game.overlays.remove('PauseMenu');
               },
               primary: true,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             _buildOverlayButton(
               context,
               label: 'RESTART',
               onPressed: () {
-                if (isSoundOn) FlameAudio.play('sfx_button.mp3');
+                if (isSoundOn) FlameAudio.play('sfx_button.mp3', volume: 0.3);
                 game.restartLevel();
               },
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             // Sound Toggle
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -215,12 +240,12 @@ class _GameScreenState extends State<GameScreen> {
                 ),
               ],
             ),
-             const SizedBox(height: 16),
+            const SizedBox(height: 12),
             _buildOverlayButton(
               context,
               label: 'LEVEL SELECT',
               onPressed: () {
-                if (isSoundOn) FlameAudio.play('sfx_button.mp3');
+                if (isSoundOn) FlameAudio.play('sfx_button.mp3', volume: 0.3);
                 Navigator.of(context).pushReplacement(
                   MaterialPageRoute(builder: (context) => const LevelSelectScreen()),
                 );
@@ -247,7 +272,7 @@ class _GameScreenState extends State<GameScreen> {
               context,
               label: 'RETRY',
               onPressed: () {
-                 if (isSoundOn) FlameAudio.play('sfx_button.mp3');
+                 if (isSoundOn) FlameAudio.play('sfx_button.mp3', volume: 0.3);
                  game.restartLevel();
               },
               primary: true,
@@ -257,7 +282,7 @@ class _GameScreenState extends State<GameScreen> {
               context,
               label: 'MAIN MENU',
               onPressed: () {
-                if (isSoundOn) FlameAudio.play('sfx_button.mp3');
+                if (isSoundOn) FlameAudio.play('sfx_button.mp3', volume: 0.3);
                 Navigator.of(context).pushReplacement(
                   MaterialPageRoute(builder: (context) => const MainMenuScreen()),
                 );
@@ -291,7 +316,7 @@ class _GameScreenState extends State<GameScreen> {
                 context,
                 label: 'NEXT LEVEL',
                 onPressed: () {
-                  if (isSoundOn) FlameAudio.play('sfx_button.mp3');
+                  if (isSoundOn) FlameAudio.play('sfx_button.mp3', volume: 0.3);
                   // Load next level
                   final nextLevelConfig = LevelConfig.levels.firstWhere(
                     (l) => l.levelNumber == widget.levelConfig.levelNumber + 1
@@ -310,7 +335,7 @@ class _GameScreenState extends State<GameScreen> {
               context,
               label: 'LEVEL SELECT',
               onPressed: () {
-                 if (isSoundOn) FlameAudio.play('sfx_button.mp3');
+                 if (isSoundOn) FlameAudio.play('sfx_button.mp3', volume: 0.3);
                  Navigator.of(context).pushReplacement(
                   MaterialPageRoute(builder: (context) => const LevelSelectScreen()),
                 );
@@ -325,18 +350,19 @@ class _GameScreenState extends State<GameScreen> {
   Widget _buildOverlayButton(BuildContext context, {required String label, required VoidCallback onPressed, bool primary = false}) {
     return SizedBox(
       width: double.infinity,
-      height: 50,
+      height: 44,
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: primary ? AppTheme.primaryButton : AppTheme.secondaryButton,
           foregroundColor: AppTheme.white,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
             side: const BorderSide(color: AppTheme.darkText, width: 2),
           ),
         ),
-        child: Text(label, style: AppTheme.buttonTextStyle),
+        child: Text(label, style: AppTheme.buttonTextStyle.copyWith(fontSize: 18)),
       ),
     );
   }

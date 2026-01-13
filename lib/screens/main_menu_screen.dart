@@ -45,13 +45,24 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+    final isLandscape = screenWidth > screenHeight;
     
-    // Responsive sizing
-    final logoWidth = (screenWidth * 0.7).clamp(200.0, 320.0);
-    final buttonWidth = (screenWidth * 0.65).clamp(180.0, 280.0);
-    final buttonHeight = (screenHeight * 0.07).clamp(50.0, 65.0);
-    final iconButtonSize = (screenWidth * 0.15).clamp(50.0, 70.0);
-    final spacing = (screenHeight * 0.02).clamp(12.0, 20.0);
+    // Responsive sizing for landscape
+    final logoWidth = isLandscape 
+        ? (screenWidth * 0.35).clamp(200.0, 350.0)
+        : (screenWidth * 0.7).clamp(200.0, 320.0);
+    final buttonWidth = isLandscape
+        ? (screenWidth * 0.28).clamp(160.0, 260.0)
+        : (screenWidth * 0.65).clamp(180.0, 280.0);
+    final buttonHeight = isLandscape
+        ? (screenHeight * 0.12).clamp(44.0, 55.0)
+        : (screenHeight * 0.07).clamp(50.0, 65.0);
+    final iconButtonSize = isLandscape
+        ? (screenHeight * 0.12).clamp(40.0, 55.0)
+        : (screenWidth * 0.15).clamp(50.0, 70.0);
+    final spacing = isLandscape
+        ? (screenHeight * 0.03).clamp(8.0, 14.0)
+        : (screenHeight * 0.02).clamp(12.0, 20.0);
     
     return Scaffold(
       body: Container(
@@ -66,161 +77,286 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
             children: [
               // Sound Toggle (Top Right)
               Positioned(
-                top: 16,
+                top: 8,
                 right: 16,
                 child: IconButton(
                   icon: Icon(
                     isSoundOn ? Icons.volume_up : Icons.volume_off, 
-                    size: 32, 
+                    size: 28, 
                     color: AppTheme.white
                   ),
                   onPressed: _toggleSound,
                 ),
               ),
               
-              // Main content - scrollable and centered
+              // Main content - landscape: side by side, portrait: stacked
               Positioned.fill(
-                top: 50, // Leave space for sound toggle
-                bottom: 50, // Leave space for privacy policy
-                child: Center(
-                  child: SingleChildScrollView(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(vertical: spacing, horizontal: 16),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // Logo
-                          Image.asset(
-                            'assets/images/ui/logo.png',
-                            width: logoWidth,
-                            errorBuilder: (context, error, stackTrace) => Text(
-                              'Pet Shelter Rush',
-                              style: AppTheme.titleStyle.copyWith(
-                                fontSize: (screenWidth * 0.08).clamp(28.0, 44.0),
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: spacing * 1.5),
-
-                          // Play Button
-                          _buildMenuButton(
-                            context,
-                            label: 'PLAY',
-                            width: buttonWidth,
-                            height: buttonHeight,
-                            onPressed: () {
-                              if (isSoundOn) FlameAudio.play('sfx_button.mp3');
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => const LevelSelectScreen()),
-                              ).then((_) => _loadState());
-                            },
-                            primary: true,
-                          ),
-                          SizedBox(height: spacing),
-
-                          // Endless Mode
-                          _buildMenuButton(
-                            context,
-                            label: 'ENDLESS MODE',
-                            width: buttonWidth,
-                            height: buttonHeight,
-                            onPressed: isEndlessUnlocked ? () {
-                              if (isSoundOn) FlameAudio.play('sfx_button.mp3');
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => GameScreen(levelConfig: LevelConfig.endless()),
-                                ),
-                              ).then((_) => _loadState());
-                            } : null,
-                            icon: isEndlessUnlocked ? null : Icons.lock,
-                          ),
-                          SizedBox(height: spacing),
-
-                          // Row for Stats and How to Play
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              _buildIconButton(
-                                context,
-                                icon: Icons.bar_chart,
-                                size: iconButtonSize,
-                                onPressed: () {
-                                   if (isSoundOn) FlameAudio.play('sfx_button.mp3');
-                                   Navigator.push(
-                                    context,
-                                    MaterialPageRoute(builder: (context) => const StatisticsScreen()),
-                                  );
-                                },
-                              ),
-                              SizedBox(width: spacing),
-                              _buildIconButton(
-                                context,
-                                icon: Icons.help_outline,
-                                size: iconButtonSize,
-                                onPressed: () {
-                                  if (isSoundOn) FlameAudio.play('sfx_button.mp3');
-                                  _showHowToPlay(context);
-                                },
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
+                child: isLandscape 
+                    ? _buildLandscapeLayout(logoWidth, buttonWidth, buttonHeight, iconButtonSize, spacing)
+                    : _buildPortraitLayout(logoWidth, buttonWidth, buttonHeight, iconButtonSize, spacing),
               ),
 
-              // High Score (Endless)
+              // High Score (Endless) - positioned based on layout
               if (isEndlessUnlocked)
                 Positioned(
-                  top: 16,
+                  top: 8,
                   left: 16,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.8),
-                      borderRadius: BorderRadius.circular(12),
+                      color: Colors.white.withValues(alpha: 0.85),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('ENDLESS BEST', style: AppTheme.bodyTextStyle.copyWith(fontSize: 12)),
-                        Text('$endlessHighScore', style: AppTheme.headerStyle.copyWith(fontSize: 20)),
+                        Text('ENDLESS BEST', style: AppTheme.bodyTextStyle.copyWith(fontSize: 10)),
+                        Text('$endlessHighScore', style: AppTheme.headerStyle.copyWith(fontSize: 16)),
                       ],
                     ),
                   ),
                 ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
-              // Privacy Policy (Bottom)
-              Positioned(
-                bottom: 16,
-                left: 0,
-                right: 0,
-                child: Center(
-                  child: TextButton(
-                    onPressed: () {
-                       if (isSoundOn) FlameAudio.play('sfx_button.mp3');
-                       Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const PrivacyPolicyScreen()),
-                      );
-                    },
-                    child: Text(
-                      'Privacy Policy',
-                      style: AppTheme.bodyTextStyle.copyWith(
-                        decoration: TextDecoration.underline,
-                        decorationColor: AppTheme.white,
-                        fontSize: 14,
-                        color: AppTheme.white,
-                      ),
-                    ),
-                  ),
+  Widget _buildLandscapeLayout(double logoWidth, double buttonWidth, double buttonHeight, double iconButtonSize, double spacing) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+      child: Row(
+        children: [
+          // Left side - Logo
+          Expanded(
+            flex: 4,
+            child: Center(
+              child: Image.asset(
+                'assets/images/ui/logo.png',
+                width: logoWidth,
+                errorBuilder: (context, error, stackTrace) => Text(
+                  'Pet Shelter Rush',
+                  style: AppTheme.titleStyle.copyWith(fontSize: 32),
                 ),
               ),
-            ],
+            ),
+          ),
+          
+          // Right side - Buttons
+          Expanded(
+            flex: 3,
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: spacing),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Play Button
+                    _buildMenuButton(
+                      context,
+                      label: 'PLAY',
+                      width: buttonWidth,
+                      height: buttonHeight,
+                      onPressed: () {
+                        if (isSoundOn) FlameAudio.play('sfx_button.mp3', volume: 0.3);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const LevelSelectScreen()),
+                        ).then((_) => _loadState());
+                      },
+                      primary: true,
+                    ),
+                    SizedBox(height: spacing),
+
+                    // Endless Mode
+                    _buildMenuButton(
+                      context,
+                      label: 'ENDLESS MODE',
+                      width: buttonWidth,
+                      height: buttonHeight,
+                      onPressed: isEndlessUnlocked ? () {
+                        if (isSoundOn) FlameAudio.play('sfx_button.mp3', volume: 0.3);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => GameScreen(levelConfig: LevelConfig.endless()),
+                          ),
+                        ).then((_) => _loadState());
+                      } : null,
+                      icon: isEndlessUnlocked ? null : Icons.lock,
+                    ),
+                    SizedBox(height: spacing),
+
+                    // Row for Stats and How to Play
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _buildIconButton(
+                          context,
+                          icon: Icons.bar_chart,
+                          size: iconButtonSize,
+                          onPressed: () {
+                            if (isSoundOn) FlameAudio.play('sfx_button.mp3', volume: 0.3);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const StatisticsScreen()),
+                            );
+                          },
+                        ),
+                        SizedBox(width: spacing),
+                        _buildIconButton(
+                          context,
+                          icon: Icons.help_outline,
+                          size: iconButtonSize,
+                          onPressed: () {
+                            if (isSoundOn) FlameAudio.play('sfx_button.mp3', volume: 0.3);
+                            _showHowToPlay(context);
+                          },
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: spacing),
+                    
+                    // Privacy Policy Button
+                    _buildPrivacyPolicyButton(buttonWidth * 0.7, buttonHeight * 0.7),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPortraitLayout(double logoWidth, double buttonWidth, double buttonHeight, double iconButtonSize, double spacing) {
+    return Column(
+      children: [
+        Expanded(
+          child: Center(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: spacing, horizontal: 16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Logo
+                    Image.asset(
+                      'assets/images/ui/logo.png',
+                      width: logoWidth,
+                      errorBuilder: (context, error, stackTrace) => Text(
+                        'Pet Shelter Rush',
+                        style: AppTheme.titleStyle.copyWith(fontSize: 36),
+                      ),
+                    ),
+                    SizedBox(height: spacing * 1.5),
+
+                    // Play Button
+                    _buildMenuButton(
+                      context,
+                      label: 'PLAY',
+                      width: buttonWidth,
+                      height: buttonHeight,
+                      onPressed: () {
+                        if (isSoundOn) FlameAudio.play('sfx_button.mp3', volume: 0.3);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const LevelSelectScreen()),
+                        ).then((_) => _loadState());
+                      },
+                      primary: true,
+                    ),
+                    SizedBox(height: spacing),
+
+                    // Endless Mode
+                    _buildMenuButton(
+                      context,
+                      label: 'ENDLESS MODE',
+                      width: buttonWidth,
+                      height: buttonHeight,
+                      onPressed: isEndlessUnlocked ? () {
+                        if (isSoundOn) FlameAudio.play('sfx_button.mp3', volume: 0.3);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => GameScreen(levelConfig: LevelConfig.endless()),
+                          ),
+                        ).then((_) => _loadState());
+                      } : null,
+                      icon: isEndlessUnlocked ? null : Icons.lock,
+                    ),
+                    SizedBox(height: spacing),
+
+                    // Row for Stats and How to Play
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _buildIconButton(
+                          context,
+                          icon: Icons.bar_chart,
+                          size: iconButtonSize,
+                          onPressed: () {
+                            if (isSoundOn) FlameAudio.play('sfx_button.mp3', volume: 0.3);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const StatisticsScreen()),
+                            );
+                          },
+                        ),
+                        SizedBox(width: spacing),
+                        _buildIconButton(
+                          context,
+                          icon: Icons.help_outline,
+                          size: iconButtonSize,
+                          onPressed: () {
+                            if (isSoundOn) FlameAudio.play('sfx_button.mp3', volume: 0.3);
+                            _showHowToPlay(context);
+                          },
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: spacing * 2),
+                    
+                    // Privacy Policy Button
+                    _buildPrivacyPolicyButton(buttonWidth * 0.6, buttonHeight * 0.7),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPrivacyPolicyButton(double width, double height) {
+    return SizedBox(
+      width: width,
+      height: height,
+      child: ElevatedButton(
+        onPressed: () {
+          if (isSoundOn) FlameAudio.play('sfx_button.mp3', volume: 0.3);
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const PrivacyPolicyScreen()),
+          );
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.white.withValues(alpha: 0.85),
+          foregroundColor: AppTheme.darkText,
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(color: AppTheme.darkText.withValues(alpha: 0.3), width: 1),
+          ),
+        ),
+        child: Text(
+          'Privacy Policy',
+          style: AppTheme.bodyTextStyle.copyWith(
+            fontSize: 12,
+            color: AppTheme.darkText,
           ),
         ),
       ),
@@ -333,7 +469,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
               SizedBox(height: dialogWidth * 0.06),
               ElevatedButton(
                 onPressed: () {
-                   if (isSoundOn) FlameAudio.play('sfx_button.mp3');
+                   if (isSoundOn) FlameAudio.play('sfx_button.mp3', volume: 0.3);
                    Navigator.pop(context);
                 },
                 style: ElevatedButton.styleFrom(

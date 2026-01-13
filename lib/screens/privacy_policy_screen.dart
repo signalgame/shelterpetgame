@@ -17,7 +17,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
           icon: const Icon(Icons.arrow_back, color: AppTheme.darkText),
           onPressed: () {
             if (StorageService.instance.getSoundEnabled()) {
-              FlameAudio.play('sfx_button.mp3');
+              FlameAudio.play('sfx_button.mp3', volume: 0.3);
             }
             Navigator.pop(context);
           },
